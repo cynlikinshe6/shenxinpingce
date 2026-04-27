@@ -253,31 +253,33 @@
         .error-page { text-align: center; padding: 40px 20px; }
         .error-icon { font-size: 64px; margin-bottom: 16px; }
 
-        .token-display {
-            background: #f0fdf0;
-            border: 2px solid #27ae60;
+        /* 访问码验证样式 */
+        .access-gate {
+            text-align: center;
+            padding: 50px 20px;
+        }
+        .access-input {
+            width: 100%;
+            max-width: 280px;
+            padding: 14px 18px;
+            border: 1.5px solid var(--border);
             border-radius: 14px;
-            padding: 16px;
+            font-size: 16px;
             text-align: center;
             margin: 16px 0;
-        }
-
-        .token-code {
             font-family: monospace;
-            font-size: 18px;
-            font-weight: 700;
-            background: #fff;
-            padding: 8px 16px;
-            border-radius: 8px;
-            margin: 8px 0;
-            word-break: break-all;
+            letter-spacing: 2px;
+            outline: none;
+            transition: border-color 0.2s;
         }
-
-        @media (max-width: 600px) {
-            .card { padding: 24px 18px; border-radius: 18px; }
-            h1 { font-size: 24px; }
-            h2 { font-size: 19px; }
-            .grid-2 { grid-template-columns: 1fr 1fr; }
+        .access-input:focus {
+            border-color: var(--accent);
+        }
+        .error-message {
+            color: #c62828;
+            font-size: 14px;
+            margin-top: 8px;
+            min-height: 20px;
         }
 
         .footer {
@@ -344,36 +346,15 @@
             const dimensions = ["身体能量", "情绪状态", "认知负荷", "自我关系", "人际压力", "意义感"];
             const optionLabels = ["很少符合", "有时符合", "经常符合"];
 
-            // ==================== 令牌验证 ====================
-            function getTokenFromURL() {
-                const params = new URLSearchParams(window.location.search);
-                return params.get('token') || params.get('t') || '';
-            }
-
-            function isValidToken(token) {
-                if (!token) return false;
-                // 【修复】允许 generate 作为特殊令牌
-                if (token === 'generate') return true;
-                // 令牌格式：order + 至少3位数字
-                return /^order\d{3,}$/.test(token);
-            }
-
-            const urlToken = getTokenFromURL();
+            // ==================== 访问码配置（在这里修改你的访问码）====================
+            const VALID_ACCESS_CODES = ["VIP2026", "INNER2024", "SHENXIN88"];
             
-            // 【修复】初始屏幕判断
-            let initScreen = 'intro';
-            if (!isValidToken(urlToken)) {
-                initScreen = 'invalid';
-            } else if (urlToken === 'generate') {
-                initScreen = 'generate';
-            }
-            
+            // ==================== 应用状态 ====================
             let state = {
-                screen: initScreen,
+                screen: 'gate', // 'gate' | 'intro' | 'question' | 'result'
                 currentQuestion: 0,
                 answers: new Array(TOTAL_QUESTIONS).fill(null),
-                token: urlToken,
-                isValid: isValidToken(urlToken),
+                accessVerified: false,
             };
 
             const mainCard = document.getElementById('mainCard');
@@ -382,10 +363,9 @@
             // ==================== 工具函数 ====================
             function updateProgress() {
                 let percent = 0;
-                if (state.screen === 'intro') percent = 0;
+                if (state.screen === 'gate' || state.screen === 'intro') percent = 0;
                 else if (state.screen === 'question') percent = (state.currentQuestion / TOTAL_QUESTIONS) * 100;
                 else if (state.screen === 'result') percent = 100;
-                else percent = 0;
                 progressBar.style.width = percent + '%';
             }
 
@@ -520,65 +500,45 @@
                 return '#c0392b';
             }
 
-            function generateToken() {
-                const num = Math.floor(100000 + Math.random() * 900000);
-                return 'order' + num;
-            }
-
             // ==================== 渲染函数 ====================
             function render() {
                 updateProgress();
                 switch (state.screen) {
-                    case 'generate': renderGenerate(); break;
-                    case 'invalid': renderInvalid(); break;
+                    case 'gate': renderGate(); break;
                     case 'intro': renderIntro(); break;
                     case 'question': renderQuestion(); break;
                     case 'result': renderResult(); break;
                 }
             }
 
-            function renderInvalid() {
+            // 访问码验证页面
+            function renderGate() {
                 mainCard.innerHTML = `
                     <div class="page">
-                        <div class="error-page">
-                            <div class="error-icon">🔗</div>
-                            <h1>链接无效</h1>
-                            <p>此测评链接无效或已失效。</p>
-                            <p class="text-sm">请确认您使用的是正确的测评链接。</p>
-                            <p class="text-sm">如果您已购买，请联系客服获取有效链接。</p>
+                        <div class="access-gate">
+                            <h1>🔐 输入访问码</h1>
+                            <p>请输入您购买后获取的专属访问码</p>
+                            <input type="text" 
+                                   id="accessCodeInput" 
+                                   class="access-input" 
+                                   placeholder="请输入访问码" 
+                                   autocomplete="off"
+                                   onkeydown="if(event.key==='Enter')window.app.verifyAccess()">
+                            <p class="error-message" id="accessError"></p>
+                            <button class="btn btn-primary" onclick="window.app.verifyAccess()">
+                                验证并开始测评 →
+                            </button>
+                            <p class="text-sm" style="margin-top:16px;">
+                                如未获取访问码，请先完成购买<br>如有问题请联系客服
+                            </p>
                         </div>
                     </div>
                 `;
-            }
-
-            function renderGenerate() {
-                const newToken = generateToken();
-                const baseURL = window.location.origin + window.location.pathname;
-                const fullURL = baseURL + '?token=' + newToken;
-
-                mainCard.innerHTML = `
-                    <div class="page">
-                        <h1>🔑 生成新令牌</h1>
-                        <p>给每位客户生成一个专属链接</p>
-                        
-                        <div class="token-display">
-                            <p style="font-weight:600;">📋 新令牌：</p>
-                            <div class="token-code">${newToken}</div>
-                            <p style="font-weight:600; margin-top:12px;">🔗 客户链接：</p>
-                            <div class="token-code" style="font-size:14px;">${fullURL}</div>
-                        </div>
-
-                        <p class="text-sm" style="text-align:center;">将此链接复制发给客户即可</p>
-
-                        <button class="btn btn-primary" onclick="window.app.copyLink('${fullURL}')">
-                            📋 复制链接
-                        </button>
-
-                        <button class="btn btn-secondary" onclick="window.app.generateNew()" style="margin-top:8px;">
-                            🔄 生成新令牌
-                        </button>
-                    </div>
-                `;
+                // 自动聚焦输入框
+                setTimeout(() => {
+                    const input = document.getElementById('accessCodeInput');
+                    if (input) input.focus();
+                }, 300);
             }
 
             function renderIntro() {
@@ -733,6 +693,31 @@
 
             // ==================== 操作方法 ====================
             window.app = {
+                // 验证访问码
+                verifyAccess() {
+                    const input = document.getElementById('accessCodeInput');
+                    const errorEl = document.getElementById('accessError');
+                    const code = input.value.trim();
+                    
+                    if (!code) {
+                        errorEl.textContent = '请输入访问码';
+                        return;
+                    }
+                    
+                    if (VALID_ACCESS_CODES.includes(code.toUpperCase())) {
+                        // 验证成功
+                        state.accessVerified = true;
+                        state.screen = 'intro';
+                        // 可选：将验证状态保存在浏览器里
+                        sessionStorage.setItem('innerscape_verified', 'true');
+                        render();
+                    } else {
+                        errorEl.textContent = '❌ 访问码错误，请检查后重试';
+                        input.value = '';
+                        input.focus();
+                    }
+                },
+
                 startTest() {
                     state.screen = 'question';
                     state.currentQuestion = 0;
@@ -775,23 +760,14 @@
                     state.currentQuestion = 0;
                     state.answers = new Array(TOTAL_QUESTIONS).fill(null);
                     render();
-                },
-
-                generateNew() {
-                    state.screen = 'generate';
-                    state.isValid = true;
-                    state.token = 'generate';
-                    render();
-                },
-
-                copyLink(url) {
-                    navigator.clipboard.writeText(url).then(() => {
-                        alert('✅ 链接已复制！\n\n请粘贴发送给客户。');
-                    }).catch(() => {
-                        prompt('请手动复制链接：', url);
-                    });
                 }
             };
+
+            // 页面加载时检查是否已验证过（同一会话内免重复验证）
+            if (sessionStorage.getItem('innerscape_verified') === 'true') {
+                state.accessVerified = true;
+                state.screen = 'intro';
+            }
 
             render();
         })();
