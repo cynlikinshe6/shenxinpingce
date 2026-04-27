@@ -344,26 +344,32 @@
             const dimensions = ["身体能量", "情绪状态", "认知负荷", "自我关系", "人际压力", "意义感"];
             const optionLabels = ["很少符合", "有时符合", "经常符合"];
 
-            // ==================== 令牌验证（自动生成模式）====================
-            // 从URL获取令牌
+            // ==================== 令牌验证 ====================
             function getTokenFromURL() {
                 const params = new URLSearchParams(window.location.search);
                 return params.get('token') || params.get('t') || '';
             }
 
-            // 验证令牌格式：必须是 "order" 开头 + 三位以上数字
-            // 这样客户无法随便猜到一个有效令牌
             function isValidToken(token) {
                 if (!token) return false;
+                // 【修复】允许 generate 作为特殊令牌
+                if (token === 'generate') return true;
                 // 令牌格式：order + 至少3位数字
-                // 例如：order001, order123, order9999
                 return /^order\d{3,}$/.test(token);
             }
 
             const urlToken = getTokenFromURL();
             
+            // 【修复】初始屏幕判断
+            let initScreen = 'intro';
+            if (!isValidToken(urlToken)) {
+                initScreen = 'invalid';
+            } else if (urlToken === 'generate') {
+                initScreen = 'generate';
+            }
+            
             let state = {
-                screen: 'intro',
+                screen: initScreen,
                 currentQuestion: 0,
                 answers: new Array(TOTAL_QUESTIONS).fill(null),
                 token: urlToken,
@@ -379,8 +385,7 @@
                 if (state.screen === 'intro') percent = 0;
                 else if (state.screen === 'question') percent = (state.currentQuestion / TOTAL_QUESTIONS) * 100;
                 else if (state.screen === 'result') percent = 100;
-                else if (state.screen === 'invalid') percent = 0;
-                else if (state.screen === 'generate') percent = 0;
+                else percent = 0;
                 progressBar.style.width = percent + '%';
             }
 
@@ -515,24 +520,20 @@
                 return '#c0392b';
             }
 
-            // 生成随机令牌
             function generateToken() {
-                const num = Math.floor(100000 + Math.random() * 900000); // 6位随机数
+                const num = Math.floor(100000 + Math.random() * 900000);
                 return 'order' + num;
             }
 
             // ==================== 渲染函数 ====================
             function render() {
                 updateProgress();
-                if (!state.isValid && state.screen !== 'generate') {
-                    renderInvalid();
-                    return;
-                }
                 switch (state.screen) {
+                    case 'generate': renderGenerate(); break;
+                    case 'invalid': renderInvalid(); break;
                     case 'intro': renderIntro(); break;
                     case 'question': renderQuestion(); break;
                     case 'result': renderResult(); break;
-                    case 'generate': renderGenerate(); break;
                 }
             }
 
@@ -550,7 +551,6 @@
                 `;
             }
 
-            // 令牌生成页面（给客服用的）
             function renderGenerate() {
                 const newToken = generateToken();
                 const baseURL = window.location.origin + window.location.pathname;
@@ -777,14 +777,13 @@
                     render();
                 },
 
-                // 进入令牌生成模式
                 generateNew() {
                     state.screen = 'generate';
                     state.isValid = true;
+                    state.token = 'generate';
                     render();
                 },
 
-                // 复制链接
                 copyLink(url) {
                     navigator.clipboard.writeText(url).then(() => {
                         alert('✅ 链接已复制！\n\n请粘贴发送给客户。');
