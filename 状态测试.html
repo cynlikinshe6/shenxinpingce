@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="description" content="专业身心状态深度测评，基于6大维度科学评估您的身体、情绪、认知、自我关系、人际压力和意义感。">
+    <title>身心结构深度测评 | 专业版</title>
+    
+    <meta property="og:title" content="身心结构深度测评 | 专业版">
+    <meta property="og:description" content="基于6大维度的科学评估，获取完整的专业身心状态报告。">
+    <meta property="og:type" content="website">
+    
+    <style>
+        :root {
+            --bg: #f5f3ef;
+            --card-bg: #ffffff;
+            --text: #1a1a1a;
+            --text-secondary: #555555;
+            --accent: #2c2c2c;
+            --border: #e8e5e0;
+            --shadow: 0 8px 32px rgba(0,0,0,0.06);
+            --radius: 20px;
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .nav-header {
+            width: 100%;
+            max-width: 700px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 8px;
+            margin-bottom: 8px;
+        }
+
+        .brand {
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .brand-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 700px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .progress-wrapper {
+            width: 100%;
+            background: rgba(0,0,0,0.05);
+            height: 4px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--accent);
+            border-radius: 10px;
+            transition: width 0.5s var(--transition);
+            width: 0%;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 36px 32px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            transition: all var(--transition);
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .page {
+            animation: fadeSlideIn 0.4s ease;
+        }
+
+        @keyframes fadeSlideIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 12px; color: #111; }
+        h2 { font-size: 22px; font-weight: 650; margin-bottom: 10px; color: #1a1a1a; }
+        h3 { font-size: 17px; font-weight: 600; margin: 20px 0 10px; color: #222; }
+        h4 { font-size: 15px; font-weight: 600; margin: 14px 0 6px; color: #333; }
+        p { color: var(--text-secondary); margin-bottom: 10px; font-size: 15px; line-height: 1.7; }
+        .text-sm { font-size: 13px; color: #888; }
+
+        .tag-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 16px 0;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 6px 14px;
+            background: #f2f2f2;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 550;
+            color: #444;
+        }
+
+        .tag.active {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 15px 24px;
+            border: none;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+            letter-spacing: 0.2px;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+        }
+
+        .btn-primary:hover { background: #000; transform: translateY(-1px); }
+        .btn-primary:active { transform: scale(0.98); }
+
+        .btn-secondary {
+            background: #fff;
+            color: var(--accent);
+            border: 1.5px solid var(--border);
+            box-shadow: none;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--accent);
+            border: 1.5px solid var(--accent);
+            box-shadow: none;
+        }
+
+        .btn-sm { padding: 10px 18px; font-size: 14px; width: auto; }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin: 16px 0;
+        }
+
+        .option-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 18px;
+            border: 1.5px solid var(--border);
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all var(--transition);
+            background: #fafaf9;
+            font-size: 15px;
+            color: #333;
+        }
+
+        .option-item:hover { background: #f2f2f0; border-color: #d0d0d0; }
+
+        .option-item.selected {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
+
+        .option-radio {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #ccc;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition);
+        }
+
+        .option-item.selected .option-radio {
+            border-color: #fff;
+            background: #fff;
+            box-shadow: inset 0 0 0 4px var(--accent);
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin: 16px 0;
+        }
+
+        .stat-card {
+            background: #f8f8f6;
+            padding: 16px 12px;
+            border-radius: 14px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 26px;
+            font-weight: 700;
+            color: #111;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #888;
+            margin-top: 4px;
+        }
+
+        .result-badge {
+            display: inline-block;
+            padding: 10px 22px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 15px;
+        }
+
+        .badge-green { background: #e8f5e9; color: #2e7d32; }
+        .badge-yellow { background: #fff8e1; color: #f57f17; }
+        .badge-orange { background: #fbe9e7; color: #d84315; }
+        .badge-red { background: #ffebee; color: #c62828; }
+
+        .insight-card {
+            background: #fafaf8;
+            border-radius: 14px;
+            padding: 18px;
+            margin: 12px 0;
+            border-left: 3px solid var(--accent);
+        }
+
+        .insight-card.warning { border-left-color: #e67e22; background: #fffaf5; }
+        .insight-card.success { border-left-color: #27ae60; background: #f5fdf7; }
+        .insight-card.info { border-left-color: #2980b9; background: #f5f9fd; }
+
+        .score-bar-track {
+            height: 8px;
+            background: #eee;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 8px 0;
+        }
+
+        .score-bar-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.8s ease;
+        }
+
+        .suggestion-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .suggestion-list li {
+            padding: 10px 14px;
+            margin: 6px 0;
+            background: #fcfcfb;
+            border-radius: 10px;
+            font-size: 14px;
+            color: #444;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .feature-table {
+            width: 100%;
+            font-size: 14px;
+            border-collapse: collapse;
+        }
+
+        .feature-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .feature-table td:first-child {
+            font-weight: 600;
+            color: #333;
+            width: 30%;
+        }
+
+        .divider {
+            height: 1px;
+            background: var(--border);
+            margin: 24px 0;
+        }
+
+        /* 错误页面 */
+        .error-page {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .error-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+
+        @media (max-width: 600px) {
+            .card { padding: 24px 18px; border-radius: 18px; }
+            h1 { font-size: 24px; }
+            h2 { font-size: 19px; }
+            .grid-2 { grid-template-columns: 1fr 1fr; }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 16px;
+            font-size: 12px;
+            color: #bbb;
+            width: 100%;
+            max-width: 700px;
+        }
+
+        .footer a { color: #888; text-decoration: none; }
+    </style>
+</head>
+<body>
+
+    <div class="nav-header">
+        <div class="brand">
+            <span class="brand-dot"></span>
+            INNERSCAPE 测评
+        </div>
+    </div>
+
+    <div class="progress-wrapper">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <div class="container">
+        <div class="card" id="mainCard"></div>
+    </div>
+
+    <div class="footer">
+        <p>© 2024 INNERSCAPE · 专业身心测评工具</p>
+    </div>
+
+    <script>
+        (function() {
+            // ==================== 题库 ====================
+            const TOTAL_QUESTIONS = 24;
+
+            const questions = [
+                { id: 1, dim: "身体能量", text: "早晨醒来时，你是否感到身体沉重或难以启动？", reversed: false },
+                { id: 2, dim: "身体能量", text: "进行日常活动时，你是否容易感到体力不支？", reversed: false },
+                { id: 3, dim: "身体能量", text: "你的睡眠是否能有效恢复精力？", reversed: true },
+                { id: 4, dim: "身体能量", text: "你是否经常感到身体紧绷或肌肉僵硬？", reversed: false },
+                { id: 5, dim: "情绪状态", text: "你是否容易因小事而产生较大情绪波动？", reversed: false },
+                { id: 6, dim: "情绪状态", text: "情绪低落时，你是否难以自我调节恢复？", reversed: false },
+                { id: 7, dim: "情绪状态", text: "你是否能自然地体验和表达喜悦？", reversed: true },
+                { id: 8, dim: "情绪状态", text: "你是否经常感到情绪麻木或空洞？", reversed: false },
+                { id: 9, dim: "认知负荷", text: "你是否经常感到思维混乱或注意力涣散？", reversed: false },
+                { id: 10, dim: "认知负荷", text: "做决定时你是否感到异常困难？", reversed: false },
+                { id: 11, dim: "认知负荷", text: "你是否能清晰地组织和表达想法？", reversed: true },
+                { id: 12, dim: "认知负荷", text: "你是否反复纠结同一问题而无法停止？", reversed: false },
+                { id: 13, dim: "自我关系", text: "你是否经常对自己产生严厉的批评？", reversed: false },
+                { id: 14, dim: "自我关系", text: "在状态不好时，你能否对自己保持友善？", reversed: true },
+                { id: 15, dim: "自我关系", text: "你是否能觉察并理解自己当前的需求？", reversed: true },
+                { id: 16, dim: "自我关系", text: "你是否感到与自己的内心疏离或陌生？", reversed: false },
+                { id: 17, dim: "人际压力", text: "社交活动后你是否感到明显的能量消耗？", reversed: false },
+                { id: 18, dim: "人际压力", text: "你是否在人际关系中经常感到需要扮演角色？", reversed: false },
+                { id: 19, dim: "人际压力", text: "你是否有可以安心表达脆弱的关系？", reversed: true },
+                { id: 20, dim: "人际压力", text: "你是否经常担心他人对自己的评价？", reversed: false },
+                { id: 21, dim: "意义感", text: "你是否对至少一件事物保持真实的兴趣？", reversed: true },
+                { id: 22, dim: "意义感", text: "你是否能感受到日常中的微小满足？", reversed: true },
+                { id: 23, dim: "意义感", text: "你是否经常质疑生活缺乏方向或价值？", reversed: false },
+                { id: 24, dim: "意义感", text: "你是否有让你愿意投入精力的目标或追求？", reversed: true }
+            ];
+
+            const dimensions = ["身体能量", "情绪状态", "认知负荷", "自我关系", "人际压力", "意义感"];
+            const optionLabels = ["很少符合", "有时符合", "经常符合"];
+
+            // ==================== 令牌验证配置 ====================
+            // 这里配置有效的令牌列表
+            // 实际使用时，这些令牌应该在您的小红书店铺后台生成
+            // 每卖出一单，生成一个新令牌，追加到这个列表
+            const VALID_TOKENS = [
+                'order001',      // 示例令牌
+                'order002',
+                'xiaohongshu1',
+                'customer2024',
+                // 您可以在这里添加更多令牌
+            ];
+
+            // 从URL获取令牌
+            function getTokenFromURL() {
+                const params = new URLSearchParams(window.location.search);
+                return params.get('token') || params.get('t') || '';
+            }
+
+            // ==================== 状态管理 ====================
+            const urlToken = getTokenFromURL();
+            
+            let state = {
+                screen: 'intro',
+                currentQuestion: 0,
+                answers: new Array(TOTAL_QUESTIONS).fill(null),
+                token: urlToken,
+                isValid: VALID_TOKENS.includes(urlToken),
+            };
+
+            const mainCard = document.getElementById('mainCard');
+            const progressBar = document.getElementById('progressBar');
+
+            // ==================== 工具函数 ====================
+            function updateProgress() {
+                let percent = 0;
+                if (state.screen === 'intro') percent = 0;
+                else if (state.screen === 'question') percent = (state.currentQuestion / TOTAL_QUESTIONS) * 100;
+                else if (state.screen === 'result') percent = 100;
+                else if (state.screen === 'invalid') percent = 0;
+                progressBar.style.width = percent + '%';
+            }
+
+            function getDimensionScores() {
+                const scores = {};
+                dimensions.forEach(d => { scores[d] = []; });
+                questions.forEach((q, i) => {
+                    const raw = state.answers[i];
+                    if (raw !== null) {
+                        const score = q.reversed ? (2 - raw) : raw;
+                        scores[q.dim].push(score);
+                    }
+                });
+                const result = {};
+                dimensions.forEach(d => {
+                    const arr = scores[d];
+                    result[d] = arr.length > 0 ? (arr.reduce((a, b) => a + b, 0) / arr.length) : 0;
+                });
+                result.overall = dimensions.reduce((sum, d) => sum + result[d], 0) / dimensions.length;
+                return result;
+            }
+
+            function getStateCategory(overall) {
+                if (overall >= 1.6) return { 
+                    name: '整合稳定型', emoji: '🌿', class: 'badge-green',
+                    desc: '各维度运转协调，身心资源充足，具备良好的自我调节能力。你目前处于一个相对平衡的状态，能够较好地应对日常压力和挑战。',
+                    color: '#2e7d32'
+                };
+                if (overall >= 1.2) return { 
+                    name: '轻度消耗型', emoji: '🌤️', class: 'badge-yellow',
+                    desc: '整体功能尚可，但部分维度已出现消耗迹象。你可能在某些方面感到轻微的疲惫或压力，需要关注恢复与调整，防止进一步下滑。',
+                    color: '#f57f17'
+                };
+                if (overall >= 0.8) return { 
+                    name: '结构透支型', emoji: '🌧️', class: 'badge-orange',
+                    desc: '多个系统出现明显疲劳，可能依赖意志力维持日常运转。你正在消耗自己的储备能量，需要正视并采取措施来恢复和重建。',
+                    color: '#d84315'
+                };
+                return { 
+                    name: '低能量保护型', emoji: '🌙', class: 'badge-red',
+                    desc: '系统进入低功耗模式，整体能量水平偏低。这是身体和心理在发出保护信号，需要优先进行基础恢复和自我关怀。',
+                    color: '#c62828'
+                };
+            }
+
+            function getDimensionAnalysis(dim, score) {
+                const analyses = {
+                    "身体能量": {
+                        high: "你的身体能量状态良好，精力充沛，能够较好地完成日常活动。",
+                        medium: "你的身体能量处于中等水平，偶尔会感到疲惫。建议关注睡眠质量。",
+                        low: "你的身体能量明显偏低，经常感到疲惫。这是需要优先关注的信号。"
+                    },
+                    "情绪状态": {
+                        high: "你的情绪状态较为稳定，具备良好的情绪调节能力。",
+                        medium: "你的情绪有些波动，可以学习一些情绪管理技巧来增强稳定性。",
+                        low: "你的情绪状态处于低谷，建议给予更多关注和照顾。"
+                    },
+                    "认知负荷": {
+                        high: "你的思维清晰，注意力集中，认知资源充足。",
+                        medium: "你有时会感到注意力不集中，适当的休息可以帮助改善。",
+                        low: "你的认知负荷较重，大脑需要休息和恢复。"
+                    },
+                    "自我关系": {
+                        high: "你与自己的关系良好，能够接纳自己的不完美。",
+                        medium: "你对自己有时友善有时严厉，增加自我觉察会有所帮助。",
+                        low: "你对自己较为严厉，改善与自己的关系是恢复的关键。"
+                    },
+                    "人际压力": {
+                        high: "你在人际关系中感到舒适，有良好的支持系统。",
+                        medium: "社交有时会让你感到疲惫，适度设立边界可以减少消耗。",
+                        low: "人际关系给你带来较大压力，需要重新审视现有关系模式。"
+                    },
+                    "意义感": {
+                        high: "你对生活保持兴趣和期待，有内在动力。",
+                        medium: "你有时会感到迷茫，但仍有部分事物能引起你的兴趣。",
+                        low: "你感到生活缺乏方向，意义感的重建需要时间和耐心。"
+                    }
+                };
+                const analysis = analyses[dim];
+                if (score >= 1.5) return { level: '良好', text: analysis.high, type: 'success' };
+                if (score >= 1.0) return { level: '一般', text: analysis.medium, type: 'info' };
+                return { level: '需要关注', text: analysis.low, type: 'warning' };
+            }
+
+            function getPersonalizedSuggestions(scores) {
+                const allSuggestions = [];
+                const urgentSuggestions = [];
+
+                if (scores['身体能量'] < 1.0) {
+                    urgentSuggestions.push({ icon: '🛌', title: '优先恢复基础睡眠', detail: '连续一周保证7-8小时睡眠，固定入睡和起床时间。' });
+                } else if (scores['身体能量'] < 1.5) {
+                    allSuggestions.push({ icon: '🚶', title: '增加轻度身体活动', detail: '每天安排15-20分钟散步或温和运动。' });
+                }
+
+                if (scores['情绪状态'] < 1.0) {
+                    urgentSuggestions.push({ icon: '📝', title: '建立情绪记录习惯', detail: '每天花5分钟记录3种主要情绪感受，不加评判地观察。' });
+                } else if (scores['情绪状态'] < 1.5) {
+                    allSuggestions.push({ icon: '🎵', title: '寻找情绪出口', detail: '通过音乐、写作或与信任的人交谈来表达情绪。' });
+                }
+
+                if (scores['认知负荷'] < 1.0) {
+                    urgentSuggestions.push({ icon: '🧠', title: '减少认知负担', detail: '使用番茄工作法（25分钟专注+5分钟休息）分段处理任务。' });
+                } else if (scores['认知负荷'] < 1.5) {
+                    allSuggestions.push({ icon: '📋', title: '建立外部辅助系统', detail: '使用待办清单、日历提醒等工具减轻大脑记忆负担。' });
+                }
+
+                if (scores['自我关系'] < 1.0) {
+                    urgentSuggestions.push({ icon: '💗', title: '练习自我慈悲', detail: '像对待最好的朋友一样对待自己，当自我批评出现时问自己"我现在需要什么？"' });
+                } else if (scores['自我关系'] < 1.5) {
+                    allSuggestions.push({ icon: '🪞', title: '增强自我觉察', detail: '每天花几分钟静坐，观察自己的想法和感受。' });
+                }
+
+                if (scores['人际压力'] < 1.0) {
+                    urgentSuggestions.push({ icon: '🚧', title: '学习设立人际边界', detail: '识别消耗型关系，允许自己拒绝不必要的社交。' });
+                } else if (scores['人际压力'] < 1.5) {
+                    allSuggestions.push({ icon: '👥', title: '培养支持性关系', detail: '主动与让你感到安全的人保持联系。' });
+                }
+
+                if (scores['意义感'] < 1.0) {
+                    urgentSuggestions.push({ icon: '🎯', title: '从小目标开始重建', detail: '设定一个可以在一周内完成的微小目标，完成后给自己肯定。' });
+                } else if (scores['意义感'] < 1.5) {
+                    allSuggestions.push({ icon: '📖', title: '探索新的可能性', detail: '接触新领域、新爱好，保持对世界的好奇心。' });
+                }
+
+                return { allSuggestions, urgentSuggestions };
+            }
+
+            function getScoreBarColor(score) {
+                if (score >= 1.6) return '#27ae60';
+                if (score >= 1.2) return '#f39c12';
+                if (score >= 0.8) return '#e67e22';
+                return '#c0392b';
+            }
+
+            // ==================== 渲染函数 ====================
+            function render() {
+                updateProgress();
+                if (!state.isValid) {
+                    renderInvalid();
+                    return;
+                }
+                switch (state.screen) {
+                    case 'intro': renderIntro(); break;
+                    case 'question': renderQuestion(); break;
+                    case 'result': renderResult(); break;
+                }
+            }
+
+            function renderInvalid() {
+                mainCard.innerHTML = `
+                    <div class="page">
+                        <div class="error-page">
+                            <div class="error-icon">🔗</div>
+                            <h1>链接无效</h1>
+                            <p>此测评链接无效或已失效。</p>
+                            <p class="text-sm">请确认您使用的是正确的测评链接。</p>
+                            <p class="text-sm">如果您已购买，请联系客服获取有效链接。</p>
+                        </div>
+                    </div>
+                `;
+            }
+
+            function renderIntro() {
+                mainCard.innerHTML = `
+                    <div class="page">
+                        <h1>🧬 身心结构深度测评</h1>
+                        <p style="font-size:16px; color:#555;">
+                            基于身体、情绪、认知、自我关系、人际和意义感<br>
+                            六大核心维度，系统性观察你的整体状态结构。
+                        </p>
+                        
+                        <div class="tag-group">
+                            ${dimensions.map(d => `<span class="tag">${d}</span>`).join('')}
+                        </div>
+
+                        <p class="text-sm">📋 24道结构化题目 · 约4-6分钟完成 · 即时生成完整报告</p>
+
+                        <button class="btn btn-primary" onclick="window.app.startTest()">
+                            开始测评 →
+                        </button>
+                    </div>
+                `;
+            }
+
+            function renderQuestion() {
+                const q = questions[state.currentQuestion];
+                const currentAnswer = state.answers[state.currentQuestion];
+                const progress = Math.round((state.currentQuestion / TOTAL_QUESTIONS) * 100);
+
+                mainCard.innerHTML = `
+                    <div class="page">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                            <span class="tag active">${q.dim}</span>
+                            <span class="text-sm">${state.currentQuestion + 1}/${TOTAL_QUESTIONS} · ${progress}%</span>
+                        </div>
+                        
+                        <h2>${q.text}</h2>
+                        <p class="text-sm">请根据近两周的实际情况选择</p>
+                        
+                        <div class="options-list">
+                            ${optionLabels.map((label, i) => `
+                                <div class="option-item ${currentAnswer === i ? 'selected' : ''}" 
+                                     data-value="${i}"
+                                     onclick="window.app.selectAnswer(${i})">
+                                    <div class="option-radio"></div>
+                                    ${label}
+                                </div>
+                            `).join('')}
+                        </div>
+
+                        <div style="display:flex; gap:10px; margin-top:auto;">
+                            <button class="btn btn-secondary btn-sm" 
+                                    ${state.currentQuestion === 0 ? 'disabled' : ''}
+                                    onclick="window.app.prevQuestion()">
+                                ← 上一题
+                            </button>
+                            <button class="btn btn-outline btn-sm" 
+                                    onclick="window.app.skipQuestion()">
+                                跳过
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            function renderResult() {
+                const scores = getDimensionScores();
+                const category = getStateCategory(scores.overall);
+                const { allSuggestions, urgentSuggestions } = getPersonalizedSuggestions(scores);
+
+                let strongest = dimensions[0], weakest = dimensions[0];
+                dimensions.forEach(d => {
+                    if (scores[d] > scores[strongest]) strongest = d;
+                    if (scores[d] < scores[weakest]) weakest = d;
+                });
+
+                const sortedDims = [...dimensions].sort((a, b) => scores[b] - scores[a]);
+
+                mainCard.innerHTML = `
+                    <div class="page">
+                        <div style="text-align:center; margin-bottom:20px;">
+                            <span class="result-badge ${category.class}">${category.emoji} ${category.name}</span>
+                        </div>
+                        
+                        <h2 style="text-align:center;">身心结构报告</h2>
+                        <p style="text-align:center; font-size:15px;">综合均分：<strong>${scores.overall.toFixed(1)}</strong> / 2.0</p>
+                        <p style="text-align:center;">${category.desc}</p>
+
+                        <div class="divider"></div>
+
+                        <h3>📊 维度状态详情</h3>
+                        ${sortedDims.map(d => {
+                            const score = scores[d];
+                            const analysis = getDimensionAnalysis(d, score);
+                            const barColor = getScoreBarColor(score);
+                            const percent = (score / 2) * 100;
+                            return `
+                                <div style="margin:16px 0;">
+                                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                                        <span style="font-weight:600; font-size:14px;">${d}</span>
+                                        <span style="font-size:14px; font-weight:700; color:${barColor};">${score.toFixed(1)} / 2.0</span>
+                                    </div>
+                                    <div class="score-bar-track">
+                                        <div class="score-bar-fill" style="width:${percent}%; background:${barColor};"></div>
+                                    </div>
+                                    <p class="text-sm" style="margin-top:4px;">${analysis.level} · ${analysis.text}</p>
+                                </div>
+                            `;
+                        }).join('')}
+
+                        <div class="divider"></div>
+
+                        <h3>🎯 结构分析</h3>
+                        
+                        <div class="insight-card success">
+                            <h4>⭐ 优势维度：${strongest}（${scores[strongest].toFixed(1)}分）</h4>
+                            <p class="text-sm">该维度是你的资源基础，建议利用这个优势支持其他维度。</p>
+                        </div>
+                        
+                        <div class="insight-card warning">
+                            <h4>⚠️ 关注维度：${weakest}（${scores[weakest].toFixed(1)}分）</h4>
+                            <p class="text-sm">该维度得分最低，建议将恢复重点优先放在此处。</p>
+                        </div>
+
+                        <div class="divider"></div>
+
+                        ${urgentSuggestions.length > 0 ? `
+                        <h3>🚨 优先恢复建议</h3>
+                        <ul class="suggestion-list">
+                            ${urgentSuggestions.map(s => `
+                                <li>
+                                    <span style="font-size:18px;">${s.icon}</span>
+                                    <div>
+                                        <strong>${s.title}</strong>
+                                        <p class="text-sm" style="margin:2px 0 0;">${s.detail}</p>
+                                    </div>
+                                </li>
+                            `).join('')}
+                        </ul>
+                        ` : ''}
+
+                        ${allSuggestions.length > 0 ? `
+                        <h3>💡 日常调整建议</h3>
+                        <ul class="suggestion-list">
+                            ${allSuggestions.map(s => `
+                                <li>
+                                    <span style="font-size:18px;">${s.icon}</span>
+                                    <div>
+                                        <strong>${s.title}</strong>
+                                        <p class="text-sm" style="margin:2px 0 0;">${s.detail}</p>
+                                    </div>
+                                </li>
+                            `).join('')}
+                        </ul>
+                        ` : ''}
+
+                        <p class="text-sm" style="background:#fffde7; padding:12px; border-radius:10px; margin-top:16px;">
+                            ⚕️ 本报告为结构性观察工具，不构成临床诊断。如有持续困扰，请寻求专业支持。
+                        </p>
+
+                        <button class="btn btn-secondary" onclick="window.app.restart()" style="margin-top:16px;">
+                            ↻ 重新测评
+                        </button>
+                    </div>
+                `;
+            }
+
+            // ==================== 操作方法 ====================
+            window.app = {
+                startTest() {
+                    state.screen = 'question';
+                    state.currentQuestion = 0;
+                    state.answers = new Array(TOTAL_QUESTIONS).fill(null);
+                    render();
+                },
+
+                selectAnswer(value) {
+                    state.answers[state.currentQuestion] = value;
+                    setTimeout(() => {
+                        if (state.currentQuestion < TOTAL_QUESTIONS - 1) {
+                            state.currentQuestion++;
+                            render();
+                        } else {
+                            state.screen = 'result';
+                            render();
+                        }
+                    }, 300);
+                },
+
+                prevQuestion() {
+                    if (state.currentQuestion > 0) {
+                        state.currentQuestion--;
+                        render();
+                    }
+                },
+
+                skipQuestion() {
+                    if (state.currentQuestion < TOTAL_QUESTIONS - 1) {
+                        state.currentQuestion++;
+                        render();
+                    } else {
+                        state.screen = 'result';
+                        render();
+                    }
+                },
+
+                restart() {
+                    state.screen = 'question';
+                    state.currentQuestion = 0;
+                    state.answers = new Array(TOTAL_QUESTIONS).fill(null);
+                    render();
+                }
+            };
+
+            render();
+        })();
+    </script>
+</body>
+</html>
