@@ -253,33 +253,31 @@
         .error-page { text-align: center; padding: 40px 20px; }
         .error-icon { font-size: 64px; margin-bottom: 16px; }
 
-        /* 访问码验证样式 */
-        .access-gate {
-            text-align: center;
-            padding: 50px 20px;
-        }
-        .access-input {
-            width: 100%;
-            max-width: 280px;
-            padding: 14px 18px;
-            border: 1.5px solid var(--border);
+        .token-display {
+            background: #f0fdf0;
+            border: 2px solid #27ae60;
             border-radius: 14px;
-            font-size: 16px;
+            padding: 16px;
             text-align: center;
             margin: 16px 0;
+        }
+
+        .token-code {
             font-family: monospace;
-            letter-spacing: 2px;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-        .access-input:focus {
-            border-color: var(--accent);
-        }
-        .error-message {
-            color: #c62828;
             font-size: 14px;
-            margin-top: 8px;
-            min-height: 20px;
+            font-weight: 700;
+            background: #fff;
+            padding: 8px 16px;
+            border-radius: 8px;
+            margin: 8px 0;
+            word-break: break-all;
+        }
+
+        @media (max-width: 600px) {
+            .card { padding: 24px 18px; border-radius: 18px; }
+            h1 { font-size: 24px; }
+            h2 { font-size: 19px; }
+            .grid-2 { grid-template-columns: 1fr 1fr; }
         }
 
         .footer {
@@ -346,15 +344,69 @@
             const dimensions = ["身体能量", "情绪状态", "认知负荷", "自我关系", "人际压力", "意义感"];
             const optionLabels = ["很少符合", "有时符合", "经常符合"];
 
-            // ==================== 访问码配置（在这里修改你的访问码）====================
-            const VALID_ACCESS_CODES = ["VIP2026", "INNER2024", "SHENXIN88"];
+            // ==================== 密钥和管理密码（务必修改这两个） ====================
+            const SECRET_KEY = "chsnekf834hfbskdls@S";        // 改成长乱字符串，如 "WoAiHeNaiCha_9527!"
+            const ADMIN_PASSWORD = "cnsdjkhdns15c";  // 改成你的管理密码，如 "Qq123456"
+
+            // ==================== 签名与验证工具 ====================
+            function simpleHash(str) {
+                let hash = 0;
+                for (let i = 0; i < str.length; i++) {
+                    const char = str.charCodeAt(i);
+                    hash = ((hash << 5) - hash) + char;
+                    hash |= 0;
+                }
+                return Math.abs(hash).toString(16).padStart(8, '0').substring(0, 6);
+            }
+
+            function generateSignature(expires) {
+                return simpleHash(SECRET_KEY + expires.toString());
+            }
+
+            function getParam(name) {
+                const params = new URLSearchParams(window.location.search);
+                return params.get(name);
+            }
+
+            function isLinkValid() {
+                const expiresStr = getParam('expires');
+                const sign = getParam('sign');
+                if (!expiresStr || !sign) return false;
+
+                const expires = parseInt(expiresStr, 10);
+                if (isNaN(expires)) return false;
+
+                const now = Math.floor(Date.now() / 1000);
+                if (now > expires) return false;
+
+                const expectedSign = generateSignature(expires);
+                return sign === expectedSign;
+            }
+
+            function generateTimedLink(hoursValid) {
+                const now = Math.floor(Date.now() / 1000);
+                const expires = now + (hoursValid * 3600);
+                const sign = generateSignature(expires);
+                const baseURL = window.location.origin + window.location.pathname;
+                return `${baseURL}?expires=${expires}&sign=${sign}`;
+            }
+
+            function checkAdminMode() {
+                return getParam('admin') === ADMIN_PASSWORD;
+            }
             
             // ==================== 应用状态 ====================
+            let initScreen = 'intro';
+            if (checkAdminMode()) {
+                initScreen = 'admin';
+            } else if (!isLinkValid()) {
+                initScreen = 'invalid';
+            }
+
             let state = {
-                screen: 'gate', // 'gate' | 'intro' | 'question' | 'result'
+                screen: initScreen,
                 currentQuestion: 0,
                 answers: new Array(TOTAL_QUESTIONS).fill(null),
-                accessVerified: false,
             };
 
             const mainCard = document.getElementById('mainCard');
@@ -363,7 +415,7 @@
             // ==================== 工具函数 ====================
             function updateProgress() {
                 let percent = 0;
-                if (state.screen === 'gate' || state.screen === 'intro') percent = 0;
+                if (state.screen === 'intro' || state.screen === 'admin' || state.screen === 'invalid') percent = 0;
                 else if (state.screen === 'question') percent = (state.currentQuestion / TOTAL_QUESTIONS) * 100;
                 else if (state.screen === 'result') percent = 100;
                 progressBar.style.width = percent + '%';
@@ -504,41 +556,56 @@
             function render() {
                 updateProgress();
                 switch (state.screen) {
-                    case 'gate': renderGate(); break;
+                    case 'invalid': renderInvalid(); break;
+                    case 'admin': renderAdmin(); break;
                     case 'intro': renderIntro(); break;
                     case 'question': renderQuestion(); break;
                     case 'result': renderResult(); break;
                 }
             }
 
-            // 访问码验证页面
-            function renderGate() {
+            function renderInvalid() {
                 mainCard.innerHTML = `
                     <div class="page">
-                        <div class="access-gate">
-                            <h1>🔐 输入访问码</h1>
-                            <p>请输入您购买后获取的专属访问码</p>
-                            <input type="text" 
-                                   id="accessCodeInput" 
-                                   class="access-input" 
-                                   placeholder="请输入访问码" 
-                                   autocomplete="off"
-                                   onkeydown="if(event.key==='Enter')window.app.verifyAccess()">
-                            <p class="error-message" id="accessError"></p>
-                            <button class="btn btn-primary" onclick="window.app.verifyAccess()">
-                                验证并开始测评 →
-                            </button>
-                            <p class="text-sm" style="margin-top:16px;">
-                                如未获取访问码，请先完成购买<br>如有问题请联系客服
-                            </p>
+                        <div class="error-page">
+                            <div class="error-icon">⏳</div>
+                            <h1>链接已失效</h1>
+                            <p>此测评链接已经过期或无效。</p>
+                            <p class="text-sm">每个链接仅在生成后的一定时间内有效，请重新获取。</p>
+                            <p class="text-sm">如果您已购买，请联系客服获取新的测评链接。</p>
                         </div>
                     </div>
                 `;
-                // 自动聚焦输入框
-                setTimeout(() => {
-                    const input = document.getElementById('accessCodeInput');
-                    if (input) input.focus();
-                }, 300);
+            }
+
+            function renderAdmin() {
+                const link24h = generateTimedLink(24);
+                const link72h = generateTimedLink(72);
+                mainCard.innerHTML = `
+                    <div class="page">
+                        <h1>🔧 生成时效测评链接</h1>
+                        <p>选择有效期并复制链接发送给客户：</p>
+                        
+                        <div class="token-display">
+                            <p style="font-weight:600;">🕐 24小时有效：</p>
+                            <div class="token-code">${link24h}</div>
+                            <button class="btn btn-sm btn-primary" onclick="navigator.clipboard.writeText('${link24h}').then(()=>alert('已复制'))" style="margin-top:8px;">📋 复制此链接</button>
+                        </div>
+                        
+                        <div class="token-display">
+                            <p style="font-weight:600;">🕒 72小时有效：</p>
+                            <div class="token-code">${link72h}</div>
+                            <button class="btn btn-sm btn-primary" onclick="navigator.clipboard.writeText('${link72h}').then(()=>alert('已复制'))" style="margin-top:8px;">📋 复制此链接</button>
+                        </div>
+
+                        <button class="btn btn-secondary" onclick="location.reload()" style="margin-top:16px;">
+                            🔄 重新生成（刷新页面）
+                        </button>
+                        <p class="text-sm" style="margin-top:16px;">
+                            ⚠️ 链接过期后自动失效，请提醒客户及时使用。
+                        </p>
+                    </div>
+                `;
             }
 
             function renderIntro() {
@@ -693,31 +760,6 @@
 
             // ==================== 操作方法 ====================
             window.app = {
-                // 验证访问码
-                verifyAccess() {
-                    const input = document.getElementById('accessCodeInput');
-                    const errorEl = document.getElementById('accessError');
-                    const code = input.value.trim();
-                    
-                    if (!code) {
-                        errorEl.textContent = '请输入访问码';
-                        return;
-                    }
-                    
-                    if (VALID_ACCESS_CODES.includes(code.toUpperCase())) {
-                        // 验证成功
-                        state.accessVerified = true;
-                        state.screen = 'intro';
-                        // 可选：将验证状态保存在浏览器里
-                        sessionStorage.setItem('innerscape_verified', 'true');
-                        render();
-                    } else {
-                        errorEl.textContent = '❌ 访问码错误，请检查后重试';
-                        input.value = '';
-                        input.focus();
-                    }
-                },
-
                 startTest() {
                     state.screen = 'question';
                     state.currentQuestion = 0;
@@ -762,12 +804,6 @@
                     render();
                 }
             };
-
-            // 页面加载时检查是否已验证过（同一会话内免重复验证）
-            if (sessionStorage.getItem('innerscape_verified') === 'true') {
-                state.accessVerified = true;
-                state.screen = 'intro';
-            }
 
             render();
         })();
